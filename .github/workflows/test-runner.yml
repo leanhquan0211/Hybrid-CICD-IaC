@@ -1,0 +1,21 @@
+name: Test Self-hosted Runner
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  test-connection:
+    runs-on: self-hosted   # Chỉ định chạy trên runner self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Show runner info
+        run: |
+          echo "Runner đang chạy trên $(uname -a)"
+          terraform --version
+          ansible --version
+          checkov --version
+          trivy --version
+          echo "Kiểm tra thành công!"
