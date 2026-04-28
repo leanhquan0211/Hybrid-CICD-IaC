@@ -13,6 +13,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Clean up old containers (if any)
+        run: |
+          docker rm -f load_balancer backend-0 backend-1 2>/dev/null || true
+
       - name: Terraform Apply
         working-directory: terraform/docker
         run: |
