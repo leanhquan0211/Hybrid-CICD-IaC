@@ -30,7 +30,7 @@ jobs:
       - name: Run Checkov (Static Analysis Terraform)
         id: checkov
         run: |
-          checkov -d . --framework terraform --soft-fail false --quiet
+          checkov -d . --framework terraform --quiet
         continue-on-error: false   # Fail nếu có lỗi nghiêm trọng
 
       - name: Build Backend Image & Scan with Trivy
