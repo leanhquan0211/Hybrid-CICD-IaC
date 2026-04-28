@@ -52,5 +52,4 @@ resource "docker_container" "lb" {
   # Đảm bảo Nginx đọc lại config sau khi ghi
   restart = "always"
 }
-# test trigger
-# final final test
+
