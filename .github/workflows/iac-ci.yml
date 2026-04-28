@@ -1,0 +1,43 @@
+name: IaC CI - Security & Plan
+
+on:
+  push:
+    paths:
+      - 'terraform/**'
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  security-and-plan:
+    runs-on: self-hosted   # Chạy trên runner của chúng ta
+    defaults:
+      run:
+        working-directory: terraform/docker   # Mọi lệnh chạy từ thư mục này
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        run: |
+          terraform init
+          terraform validate
+
+      - name: Terraform Plan (Dry-run)
+        run: terraform plan -out=tfplan
+
+      - name: Run Checkov (Static Analysis Terraform)
+        id: checkov
+        run: |
+          checkov -d . --framework terraform --soft-fail false --quiet
+        continue-on-error: false   # Fail nếu có lỗi nghiêm trọng
+
+      - name: Build Backend Image & Scan with Trivy
+        if: success()   # Chỉ chạy nếu Checkov pass
+        run: |
+          # Sử dụng image backend từ variables (lấy từ biến mặc định nginx:alpine)
+          docker pull ${IMAGE:-nginx:alpine}
+          trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 ${IMAGE:-nginx:alpine}
+        env:
+          IMAGE: nginx:alpine   # Có thể thay đổi hoặc lấy từ variables.tf
