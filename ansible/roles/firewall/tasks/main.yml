@@ -1,0 +1,43 @@
+---
+- name: Flush existing iptables rules
+  iptables:
+    flush: true
+  ignore_errors: true
+
+- name: Set default policies
+  iptables:
+    chain: "{{ item }}"
+    policy: DROP
+  loop:
+    - INPUT
+    - FORWARD
+
+- name: Allow established connections
+  iptables:
+    chain: INPUT
+    ctstate: ESTABLISHED,RELATED
+    jump: ACCEPT
+
+- name: Rate-limit HTTP to 10 connections per second
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: "80"
+    match: limit
+    limit: "10/sec"
+    jump: ACCEPT
+
+- name: Rate-limit HTTPS
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: "443"
+    match: limit
+    limit: "10/sec"
+    jump: ACCEPT
+
+- name: Allow loopback
+  iptables:
+    chain: INPUT
+    in_interface: lo
+    jump: ACCEPT

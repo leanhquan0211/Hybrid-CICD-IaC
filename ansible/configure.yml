@@ -1,0 +1,7 @@
+---
+- name: Apply network security and LB configuration
+  hosts: localhost
+  connection: local
+  become: yes
+  roles:
+    - loadbalancer
