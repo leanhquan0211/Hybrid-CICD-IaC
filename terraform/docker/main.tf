@@ -52,12 +52,3 @@ resource "docker_container" "lb" {
   # Đảm bảo Nginx đọc lại config sau khi ghi
   restart = "always"
 }
-resource "docker_container" "bad_practice" {
-  name  = "test-ssh-open"
-  image = "nginx:alpine"
-  ports {
-    internal = 22
-    external = 2222
-    protocol = "tcp"
-  }
-}
