@@ -37,7 +37,7 @@ jobs:
         if: success()   # Chỉ chạy nếu Checkov pass
         run: |
           # Sử dụng image backend từ variables (lấy từ biến mặc định nginx:alpine)
-          sudo docker pull ${IMAGE:-nginx:alpine}
+          docker pull ${IMAGE:-nginx:alpine}
           trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 ${IMAGE:-nginx:alpine}
         env:
           IMAGE: nginx:alpine   # Có thể thay đổi hoặc lấy từ variables.tf
