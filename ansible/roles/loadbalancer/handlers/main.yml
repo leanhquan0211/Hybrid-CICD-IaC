@@ -1,3 +1,0 @@
----
-- name: restart loadbalancer
-  command: docker restart load_balancer
