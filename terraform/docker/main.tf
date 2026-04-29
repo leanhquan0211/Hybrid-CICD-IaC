@@ -12,7 +12,6 @@ resource "docker_container" "backend" {
   networks_advanced {
     name = docker_network.app_net.name
   }
-  # Không map port ra ngoài, chỉ nội bộ
 }
 
 # Tạo file cấu hình Nginx LB
@@ -34,7 +33,7 @@ server {
 EOF
 }
 
-# Tải image Nginx và khởi chạy LB, gắn config vào
+# Container Load Balancer
 resource "docker_container" "lb" {
   name  = "load_balancer"
   image = var.lb_image
@@ -49,9 +48,9 @@ resource "docker_container" "lb" {
     content = data.template_file.nginx_conf.rendered
     file    = "/etc/nginx/conf.d/default.conf"
   }
-  # Đảm bảo Nginx đọc lại config sau khi ghi
   restart = "always"
-  
+}
+
 # Container cAdvisor để thu thập metrics Docker
 resource "docker_container" "cadvisor" {
   name  = "cadvisor"
@@ -83,8 +82,9 @@ resource "docker_container" "cadvisor" {
     host_path      = "/var/lib/docker"
     read_only      = true
   }
+}
 
-  # Prometheus container
+# Prometheus container
 resource "docker_container" "prometheus" {
   name  = "prometheus"
   image = "prom/prometheus:latest"
@@ -101,7 +101,8 @@ resource "docker_container" "prometheus" {
     host_path      = abspath("${path.module}/prometheus/prometheus.yml")
     read_only      = true
   }
-  
+}
+
 # Grafana container
 resource "docker_container" "grafana" {
   name  = "grafana"
@@ -121,6 +122,6 @@ resource "docker_container" "grafana" {
   }
   env = [
     "GF_SECURITY_ADMIN_USER=admin",
-    "GF_SECURITY_ADMIN_PASSWORD=admin"  # bạn có thể đổi mật khẩu mạnh hơn
+    "GF_SECURITY_ADMIN_PASSWORD=admin"
   ]
 }
