@@ -1,1 +1,2 @@
 .terraform/
+nginx_lb.conf
