@@ -15,7 +15,7 @@ jobs:
 
       - name: Clean up old containers (if any)
         run: |
-          docker rm -f load_balancer backend-0 backend-1 2>/dev/null || true
+          docker rm -f load_balancer backend-0 backend-1 cadvisor prometheus grafana 2>/dev/null || true || true
 
       - name: Terraform Apply
         working-directory: terraform/docker
