@@ -51,7 +51,76 @@ resource "docker_container" "lb" {
   }
   # Đảm bảo Nginx đọc lại config sau khi ghi
   restart = "always"
-}
-#Test n
+  
+# Container cAdvisor để thu thập metrics Docker
+resource "docker_container" "cadvisor" {
+  name  = "cadvisor"
+  image = "gcr.io/cadvisor/cadvisor:latest"
+  restart = "always"
+  networks_advanced {
+    name = docker_network.app_net.name
+  }
+  ports {
+    internal = 8080
+    external = 8080
+  }
+  volumes {
+    container_path = "/rootfs"
+    host_path      = "/"
+    read_only      = true
+  }
+  volumes {
+    container_path = "/var/run"
+    host_path      = "/var/run"
+  }
+  volumes {
+    container_path = "/sys"
+    host_path      = "/sys"
+    read_only      = true
+  }
+  volumes {
+    container_path = "/var/lib/docker"
+    host_path      = "/var/lib/docker"
+    read_only      = true
+  }
 
-# trigger CD pipeline
+  # Prometheus container
+resource "docker_container" "prometheus" {
+  name  = "prometheus"
+  image = "prom/prometheus:latest"
+  restart = "always"
+  networks_advanced {
+    name = docker_network.app_net.name
+  }
+  ports {
+    internal = 9090
+    external = 9090
+  }
+  volumes {
+    container_path = "/etc/prometheus/prometheus.yml"
+    host_path      = abspath("${path.module}/prometheus/prometheus.yml")
+    read_only      = true
+  }
+  
+# Grafana container
+resource "docker_container" "grafana" {
+  name  = "grafana"
+  image = "grafana/grafana:latest"
+  restart = "always"
+  networks_advanced {
+    name = docker_network.app_net.name
+  }
+  ports {
+    internal = 3000
+    external = 3000
+  }
+  volumes {
+    container_path = "/etc/grafana/provisioning/datasources"
+    host_path      = abspath("${path.module}/grafana/provisioning/datasources")
+    read_only      = true
+  }
+  env = [
+    "GF_SECURITY_ADMIN_USER=admin",
+    "GF_SECURITY_ADMIN_PASSWORD=admin"  # bạn có thể đổi mật khẩu mạnh hơn
+  ]
+}
