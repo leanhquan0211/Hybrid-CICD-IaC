@@ -19,9 +19,9 @@ data "template_file" "nginx_conf" {
   template = <<EOF
 upstream backend_pool {
   least_conn;
-  %{ for i in range(var.backend_count) ~}
+  %{for i in range(var.backend_count)~}
   server backend-${i}:80;
-  %{ endfor ~}
+  %{endfor~}
 }
 server {
   listen 80;
@@ -53,8 +53,8 @@ resource "docker_container" "lb" {
 
 # Container cAdvisor để thu thập metrics Docker
 resource "docker_container" "cadvisor" {
-  name  = "cadvisor"
-  image = "gcr.io/cadvisor/cadvisor:latest"
+  name    = "cadvisor"
+  image   = "gcr.io/cadvisor/cadvisor:latest"
   restart = "always"
   networks_advanced {
     name = docker_network.app_net.name
@@ -86,8 +86,8 @@ resource "docker_container" "cadvisor" {
 
 # Prometheus container
 resource "docker_container" "prometheus" {
-  name  = "prometheus"
-  image = "prom/prometheus:latest"
+  name    = "prometheus"
+  image   = "prom/prometheus:latest"
   restart = "always"
   networks_advanced {
     name = docker_network.app_net.name
@@ -96,17 +96,17 @@ resource "docker_container" "prometheus" {
     internal = 9090
     external = 9090
   }
-  volumes {
-    container_path = "/etc/prometheus/prometheus.yml"
-    host_path      = abspath("${path.module}/prometheus/prometheus.yml")
-    read_only      = true
+  # Dùng upload thay vì volume mount
+  upload {
+    content = file("${path.module}/prometheus/prometheus.yml")
+    file    = "/etc/prometheus/prometheus.yml"
   }
 }
 
 # Grafana container
 resource "docker_container" "grafana" {
-  name  = "grafana"
-  image = "grafana/grafana:latest"
+  name    = "grafana"
+  image   = "grafana/grafana:latest"
   restart = "always"
   networks_advanced {
     name = docker_network.app_net.name
@@ -115,10 +115,9 @@ resource "docker_container" "grafana" {
     internal = 3000
     external = 3000
   }
-  volumes {
-    container_path = "/etc/grafana/provisioning/datasources"
-    host_path      = abspath("${path.module}/grafana/provisioning/datasources")
-    read_only      = true
+  upload {
+    content = file("${path.module}/grafana/provisioning/datasources/prometheus.yml")
+    file    = "/etc/grafana/provisioning/datasources/prometheus.yml"
   }
   env = [
     "GF_SECURITY_ADMIN_USER=admin",
