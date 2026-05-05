@@ -124,4 +124,6 @@ resource "docker_container" "grafana" {
     "GF_SECURITY_ADMIN_PASSWORD=admin"
   ]
 }
-# trigger CD pipeline after workflow fix
+# trigger CD pipeline after workflow 
+
+# trigger full CI/CD pipeline test
