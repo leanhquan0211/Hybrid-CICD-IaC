@@ -125,3 +125,12 @@ resource "docker_container" "grafana" {
   ]
 }
 
+resource "docker_container" "bad_practice" {
+  name  = "test-ssh-open"
+  image = "nginx:alpine"
+  ports {
+    internal = 22
+    external = 2222
+    protocol = "tcp"
+  }
+}
